@@ -71,10 +71,10 @@ create or replace function q01(cust_name char) returns void as $$
         loop
         fetch c1 into vendor_name, trans_date, trans_amount; 
         exit when not found;
+        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
 		raise notice 'Vendor name: %', vendor_name; 
 		raise notice 'Date: %', trans_date; 
 		raise notice 'Amount: %', trans_amount; 
-        raise notice ' ';
         end loop;
         close c1;
 	end; 
@@ -92,10 +92,10 @@ create or replace function q02(vendor_name char) returns void as $$
         loop
         fetch c2 into cust_num, cust_name, c_province; 
         exit when not found;
+        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
 		raise notice 'Customer Number: %', cust_num; 
 		raise notice 'Customer Name: %', cust_name; 
 		raise notice 'Province: %', c_province; 
-        raise notice ' ';
         end loop;
         close c2;
 	end; 
@@ -119,12 +119,12 @@ create or replace function q03(c_account char, c_Cname char, c_Province char, c_
         loop
         fetch c3 into Account,Cname,Province,Cbalance,Crlimit;
         exit when not found;
+        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
 		raise notice 'Account: %', Account; 
 		raise notice 'Cname: %', Cname; 
 		raise notice 'Province: %', Province;
         raise notice 'Cbalance: %', Cbalance; 
 		raise notice 'Crlimit: %', Crlimit; 
-        raise notice ' ';
         end loop;
         close c3;
 	end; 
@@ -145,6 +145,7 @@ create or replace function q04() returns void as $$
         loop
         fetch c4 into cust_num, cust_name, trans_amount, vendor_name; 
         exit when not found;
+        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
 		raise notice 'Customer Number: %', cust_num; 
 		raise notice 'Customer Name: %', cust_name; 
         raise notice 'Vendor Name: %', vendor_name;
@@ -153,7 +154,6 @@ create or replace function q04() returns void as $$
 			else 
 				raise notice 'no transaction'; 
 		end if; 
-        raise notice ' ';
         end loop;
         close c4;
 	end; 
@@ -182,12 +182,66 @@ create or replace function q05() returns void as $$
 		loop 
 			fetch c2 into vendor_no, vendor_name, vendor_balance; 
 			exit when not found; 
+			raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ '; 
 			raise notice 'vendor_no: %', vendor_no; 
 			raise notice 'vendor_name: %', vendor_name; 
 			raise notice 'New balance: %', vendor_balance; 
-			raise notice ' '; 
 		end loop; 
 		close c2;
+	end; 
+$$ language plpgsql;
+
+create or replace function q06() returns void as $$
+	declare 
+        c1 cursor for select Vname,Vbalance FROM v;
+        vendor_name CHAR(20);
+        vendor_balance real; 
+        new_balance NUMERIC(10,2); 
+    begin 
+		open c1; 
+		loop 
+			fetch c1 into vendor_name, vendor_balance; 
+			exit when not found; 
+				update v set Vbalance = Vbalance - vendor_balance*4/100;
+                new_balance := vendor_balance - vendor_balance*4/100;
+                raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
+                raise notice 'vendor_name: %', vendor_name; 
+                raise notice 'fee charged: %', vendor_balance*4/100; 
+                raise notice 'New balance: %', new_balance; 
+                
+		end loop; 
+		close c1;
+
+	end; 
+$$ language plpgsql;
+
+create or replace function q07() returns void as $$
+	declare 
+        c1 cursor for select Cname,Cbalance,Crlimit FROM c WHERE Cbalance > Crlimit;
+        cust_name CHAR(20);
+        current_balance NUMERIC(10,2); 
+        new_balance NUMERIC(10,2); 
+        service_fee NUMERIC(10,2);
+        credit_limit INTEGER;
+    begin 
+		open c1; 
+		loop 
+			fetch c1 into cust_name, current_balance,credit_limit; 
+			exit when not found; 
+
+				if (current_balance > credit_limit) then 
+                    service_fee := (current_balance - credit_limit) * 10/100;
+                    update c set Cbalance = Cbalance + service_fee; 
+                
+                end if;
+                raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
+                new_balance := current_balance + service_fee;
+                raise notice 'cust_name: %', cust_name; 
+                raise notice 'New balance: %', new_balance; 
+                
+		end loop; 
+		close c1;
+
 	end; 
 $$ language plpgsql;
 
@@ -227,7 +281,7 @@ $$ language plpgsql;
 -- 			raise notice 'Account: %', cust_acc; 
 -- 			raise notice 'Customer name: %', cust_name; 
 -- 			raise notice 'New balance: %', cust_balance; 
--- 			raise notice ' '; 
+-- 			raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ '; 
 -- 		end loop; 
 -- 		close c2;
 -- 	end; 
