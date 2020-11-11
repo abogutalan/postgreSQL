@@ -1,7 +1,8 @@
 /* 
-     * This ﬁle contains two SQL commands that insert two tuples 
-     * into the c table. 
-     \i f01.sql
+     * Abdullah Ogutalan
+     * 1109732  
+     * cis3530
+     * A3
     */ 
 
 -- drop tables
@@ -46,7 +47,7 @@ INSERT INTO v VALUES (DEFAULT, 'IKEA', 'Toronto', 200.00),
                      (DEFAULT, 'Walmart', 'Waterloo', 671.05),
                      (DEFAULT, 'Esso', 'Windsor', 0.00),
                      (DEFAULT, 'Esso', 'Waterloo', 225.00);  
-                     
+                     --        V  C
 INSERT INTO t VALUES (DEFAULT, 2, 1, '2020-07-15', 1325.00), 
                      (DEFAULT, 2, 3, '2019-12-16', 1900.00),
                      (DEFAULT, 3, 1, '2020-09-01', 2500.00),
@@ -54,80 +55,19 @@ INSERT INTO t VALUES (DEFAULT, 2, 1, '2020-07-15', 1325.00),
                      (DEFAULT, 4, 3, '2020-07-31', 2212.00);    
 
 -- functions
-create or replace function q01(cust_name char) returns void as $$ 
-	declare 
-        c1 cursor for select Vname, T_Date, Amount FROM c,t,v 
-            WHERE c.Account=t.Account AND v.Vno=t.Vno AND Cname=cust_name;
-		vendor_name CHAR(20); 
-		trans_date Date; 
-		trans_amount char(10); 
-	begin 
-        open c1;
-        loop
-        fetch c1 into vendor_name, trans_date, trans_amount; 
-        exit when not found;
-        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
-		raise notice 'Vendor name: %', vendor_name; 
-		raise notice 'Date: %', trans_date; 
-		raise notice 'Amount: %', trans_amount; 
-        end loop;
-        close c1;
-	end; 
-$$ language plpgsql;
 
-create or replace function q02(vendor_name char) returns void as $$ 
-	declare 
-        c2 cursor for select c.Account, Cname, Province FROM c,t,v 
-            WHERE c.Account=t.Account AND v.Vno=t.Vno AND Vname=vendor_name;
-		cust_num CHAR(5); 
-		cust_name CHAR(20); 
-		c_province CHAR(3); 
-	begin 
-        open c2;
-        loop
-        fetch c2 into cust_num, cust_name, c_province; 
-        exit when not found;
-        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
-		raise notice 'Customer Number: %', cust_num; 
-		raise notice 'Customer Name: %', cust_name; 
-		raise notice 'Province: %', c_province; 
-        end loop;
-        close c2;
-	end; 
-$$ language plpgsql;
+
+
 
        
 
 -- // to do: double-check c_Cbalance
-create or replace function q03(c_account int, c_Cname char, c_Province char, c_Cbalance NUMERIC, c_Crlimit INTEGER) returns void as $$ 
-	
-	declare 
-        c3 cursor for select * from c;
-		Account int;
-        Cname CHAR(20);
-        Province CHAR(3);
-        Cbalance NUMERIC(10,2);
-        Crlimit INTEGER;
-	begin 
-	INSERT INTO c VALUES (DEFAULT, c_Cname, c_Province, 0.00, c_Crlimit);
-        open c3;
-        loop
-        fetch c3 into Account,Cname,Province,Cbalance,Crlimit;
-        exit when not found;
-        raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
-		raise notice 'Account: %', Account; 
-		raise notice 'Cname: %', Cname; 
-		raise notice 'Province: %', Province;
-        raise notice 'Cbalance: %', Cbalance; 
-		raise notice 'Crlimit: %', Crlimit; 
-        end loop;
-        close c3;
-	end; 
-$$ language plpgsql;
--- select q03('A4', 'burhann', 'ONT', 0.00, 3228);
+
 
 
 -- // to do : display no transaction only?
+-- newly added customer does not exist on transaction table 
+--  thus we should print no transaction for that one.
 create or replace function q04() returns void as $$ 
 	declare 
         c4 cursor for select DISTINCT ON (c.Account)c.Account,Cname,Amount,Vname FROM c,t,v

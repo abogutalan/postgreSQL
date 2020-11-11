@@ -1,5 +1,5 @@
 
--- \prompt 'enter some text: ' psqlvar
+-- prompt to get input from the user
 \prompt 'Enter vendor number: ' vendor_num
 \prompt 'Enter account number: ' account_num
 \prompt 'Enter amount: ' amount
@@ -10,10 +10,11 @@ select set_config('psql.account_num', :'account_num', false);
 select set_config('psql.amount', :'amount', false);
 \o
 do $$
---   DECLARE var text = current_setting('psql.psqlvar');
+--   DECLARE variables
   DECLARE vendorNum text = current_setting('psql.vendor_num');
   DECLARE accountNum text = current_setting('psql.account_num');
   DECLARE amount text = current_setting('psql.amount');
+  DECLARE new_tno int;
   DECLARE vno_counter int;
   DECLARE account_counter int;
   DECLARE updated_C_balance NUMERIC(10,2);
@@ -42,7 +43,9 @@ BEGIN
     update v set Vbalance = Vbalance + cast(amount as int) 
         where Vno = cast(vendorNum as int); 
 
-  RAISE NOTICE 'tno: Auto Incremented';
+-- get the newly added Tno
+  select MAX(Tno) into new_tno from t;
+  RAISE NOTICE 'tno is: %', new_tno;
   RAISE NOTICE 'vendor number is: %', vendorNum;
 	RAISE NOTICE 'account number is: %', accountNum;
   RAISE NOTICE 'date: %', CURRENT_DATE; 
