@@ -22,3 +22,6 @@ To show the definition of a table
 > run a function:
     user_id=>select funcName();
     EX: select q03('Esso', 'Waterloo');                   
+
+
+    

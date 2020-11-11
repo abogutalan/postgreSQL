@@ -10,8 +10,8 @@ DROP TABLE c;
 DROP TABLE v;
 
 -- create tables
-CREATE TABLE IF NOT EXISTS c (                  --customer
-    Account CHAR(5), 
+CREATE TABLE c (
+    Account SERIAL, 
     Cname CHAR(20), 
     Province CHAR(3),
     Cbalance NUMERIC(10,2), 
@@ -19,18 +19,18 @@ CREATE TABLE IF NOT EXISTS c (                  --customer
     PRIMARY KEY (Account)
     );
 
-CREATE TABLE IF NOT EXISTS v (                  -- vendor
-    Vno CHAR(5), 
+CREATE TABLE v (
+    Vno SERIAL, 
     Vname CHAR(20), 
     City CHAR(30),
     Vbalance NUMERIC(10,2), 
     PRIMARY KEY (Vno)
     );
 
-CREATE TABLE IF NOT EXISTS t (                 -- transaction
-    Tno CHAR(5),
-    Vno CHAR(5),
-    Account CHAR(5), 
+CREATE TABLE t (
+    Tno SERIAL,
+    Vno SERIAL,
+    Account SERIAL, 
     T_Date Date,
     Amount NUMERIC(10,2), 
     PRIMARY KEY (Tno),
@@ -38,25 +38,20 @@ CREATE TABLE IF NOT EXISTS t (                 -- transaction
     FOREIGN KEY (Account) REFERENCES c(Account)
     );
 
--- displays data of all the transactions of a given customer. 
--- For each transaction, the data to display include vendor name, date, and amount.
--- insert tuples
-INSERT INTO c VALUES ('A1', 'Smith', 'ONT', 2515.00, 2000), 
-                     ('A2', 'Jones', 'BC', 2014.00, 2500),
-                     ('A3', 'Doc', 'ONT', 150.00, 1000);
+INSERT INTO c VALUES (DEFAULT, 'Smith', 'ONT', 2515.00, 2000), 
+                     (DEFAULT, 'Jones', 'BC', 2014.00, 2500),
+                     (DEFAULT, 'Doc', 'ONT', 150.00, 1000);
                      
-INSERT INTO v VALUES ('V1', 'IKEA', 'Toronto', 200.00), 
-                     ('V2', 'Walmart', 'Waterloo', 671.05),
-                     ('V3', 'Esso', 'Windsor', 0.00),
-                     ('V4', 'Esso', 'Waterloo', 225.00);  
+INSERT INTO v VALUES (DEFAULT, 'IKEA', 'Toronto', 200.00), 
+                     (DEFAULT, 'Walmart', 'Waterloo', 671.05),
+                     (DEFAULT, 'Esso', 'Windsor', 0.00),
+                     (DEFAULT, 'Esso', 'Waterloo', 225.00);  
                      
-INSERT INTO t VALUES ('T1', 'V2', 'A1', '2020-07-15', 1325.00), 
-                     ('T2', 'V2', 'A3', '2019-12-16', 1900.00),
-                     ('T3', 'V3', 'A1', '2020-09-01', 2500.00),
-                     ('T4', 'V4', 'A2', '2020-03-20', 1613.00),
-                     ('T5', 'V4', 'A3', '2020-07-31', 2212.00),
-                     ('T6', 'V4', 'A3', '2020-07-31', 2216.00);                    
-                     
+INSERT INTO t VALUES (DEFAULT, 2, 1, '2020-07-15', 1325.00), 
+                     (DEFAULT, 2, 3, '2019-12-16', 1900.00),
+                     (DEFAULT, 3, 1, '2020-09-01', 2500.00),
+                     (DEFAULT, 4, 2, '2020-03-20', 1613.00),
+                     (DEFAULT, 4, 3, '2020-07-31', 2212.00);    
 
 -- functions
 create or replace function q01(cust_name char) returns void as $$ 
@@ -104,17 +99,17 @@ $$ language plpgsql;
        
 
 -- // to do: double-check c_Cbalance
-create or replace function q03(c_account char, c_Cname char, c_Province char, c_Cbalance NUMERIC, c_Crlimit INTEGER) returns void as $$ 
+create or replace function q03(c_account int, c_Cname char, c_Province char, c_Cbalance NUMERIC, c_Crlimit INTEGER) returns void as $$ 
 	
 	declare 
         c3 cursor for select * from c;
-		Account CHAR(5);
+		Account int;
         Cname CHAR(20);
         Province CHAR(3);
         Cbalance NUMERIC(10,2);
         Crlimit INTEGER;
 	begin 
-	INSERT INTO c VALUES (c_account, c_Cname, c_Province, 0.00, c_Crlimit);
+	INSERT INTO c VALUES (DEFAULT, c_Cname, c_Province, 0.00, c_Crlimit);
         open c3;
         loop
         fetch c3 into Account,Cname,Province,Cbalance,Crlimit;
@@ -132,6 +127,7 @@ $$ language plpgsql;
 -- select q03('A4', 'burhann', 'ONT', 0.00, 3228);
 
 
+-- // to do : display no transaction only?
 create or replace function q04() returns void as $$ 
 	declare 
         c4 cursor for select DISTINCT ON (c.Account)c.Account,Cname,Amount,Vname FROM c,t,v
@@ -236,7 +232,7 @@ create or replace function q07() returns void as $$
                 end if;
                 raise notice '~~~~~~~~~~~~~~~~~~~~~~~~~~ ';
                 new_balance := current_balance + service_fee;
-                raise notice 'cust_name: %', cust_name; 
+                raise notice 'cust_name: %', cust_name; --CONCAT(trim(cust_name),1)
                 raise notice 'New balance: %', new_balance; 
                 
 		end loop; 
@@ -244,6 +240,7 @@ create or replace function q07() returns void as $$
 
 	end; 
 $$ language plpgsql;
+
 
 
 
