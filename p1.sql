@@ -1,10 +1,16 @@
+/* 
+     * Abdullah Ogutalan
+     * 1109732  
+     * cis3530
+     * A3
+*/ 
 create or replace function q01(cust_name char) returns void as $$ 
 	declare 
         c1 cursor for select Vname, T_Date, Amount FROM c,t,v 
             WHERE c.Account=t.Account AND v.Vno=t.Vno AND Cname=cust_name;
 		vendor_name CHAR(20); 
 		trans_date Date; 
-		trans_amount char(10); 
+		trans_amount NUMERIC(10,2); 
 	begin 
         open c1;
         loop

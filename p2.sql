@@ -1,8 +1,15 @@
+/* 
+     * Abdullah Ogutalan
+     * 1109732  
+     * cis3530
+     * A3
+*/
+
 create or replace function q02(vendor_name char) returns void as $$ 
 	declare 
         c2 cursor for select c.Account, Cname, Province FROM c,t,v 
             WHERE c.Account=t.Account AND v.Vno=t.Vno AND Vname=vendor_name;
-		cust_num CHAR(5); 
+		cust_num int; 
 		cust_name CHAR(20); 
 		c_province CHAR(3); 
 	begin 

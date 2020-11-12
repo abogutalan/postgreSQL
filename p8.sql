@@ -1,4 +1,11 @@
 
+/* 
+     * Abdullah Ogutalan
+     * 1109732  
+     * cis3530
+     * A3
+*/ 
+
 -- prompt to get input from the user
 \prompt 'Enter vendor number: ' vendor_num
 \prompt 'Enter account number: ' account_num
@@ -26,9 +33,13 @@ BEGIN
 
 -- checking whether the input values are integer or not
 --    and if vendor and account numbers exist on the table
-  if not ((vendorNum ~ '^[1-9]+$') AND (cast(vendorNum as int) <= vno_counter)) then    
+  if not ((vendorNum ~ '^[0-9]+$') 
+    AND (cast(vendorNum as int) <= vno_counter)
+      AND (cast(vendorNum as int) > 0)) then    
 	    RAISE NOTICE 'Not VALID vendor number: %', vendorNum;
-  elsif not ((accountNum ~ '^[1-9]+$') AND (cast(accountNum as int) <= account_counter)) then   
+  elsif not ((accountNum ~ '^[0-9]+$') 
+    AND (cast(accountNum as int) <= account_counter)
+      AND (cast(accountNum as int) > 0)) then   
 	    RAISE NOTICE 'Not VALID account number: %', accountNum;
   elsif not (amount ~ '^[0-9]+$') then   
 	    RAISE NOTICE 'Not VALID amount: %', amount;
@@ -38,7 +49,7 @@ BEGIN
 
 -- updates the balances of the related customer and vendor 
 --    with the amount of the new transaction
-    update c set Cbalance = Cbalance - cast(amount as int) 
+    update c set Cbalance = Cbalance + cast(amount as int) 
         where Account = cast(accountNum as int);
     update v set Vbalance = Vbalance + cast(amount as int) 
         where Vno = cast(vendorNum as int); 
