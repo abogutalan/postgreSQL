@@ -1,9 +1,3 @@
-/* 
-     * Abdullah Ogutalan
-     * 1109732  
-     * cis3530
-     * A3
-*/ 
 
 > Connecting to Database:
 $ psql –h db              
